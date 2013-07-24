@@ -73,4 +73,11 @@ public class Handler
 		}
 		return footprintText;
 	}
+	
+	protected void clearFootprint()
+	{
+		ArrayList<Integer> userFootprint=(ArrayList<Integer>)userData.get(FOOTPRINT_KEY);
+		userFootprint.clear();
+		userFootprint.add(0);
+	}
 }

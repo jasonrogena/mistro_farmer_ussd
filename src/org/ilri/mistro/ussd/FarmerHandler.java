@@ -9,14 +9,12 @@ import hms.sdp.ussd.client.MchoiceUssdSender;
 
 public class FarmerHandler extends Handler
 {
-	public static final String KEY="testDayHandler";
-	public static final int screen1Id=2322;
+	public static final String KEY="farmerHandler";
+	public static final int screen1Id=1;
 	private final String[] screens=new String[]
 	        {"REGISTRATION\n\n What is your name?",
 			"REGISTRATION\n\n Which County are you in?",
-			"REGISTRATION\n\n Which District are you in?",
-			"REGISTRATION\n\n How many cows do you have?",
-			""};
+			"REGISTRATION\n\n Which District are you in?"};
 	private final Farmer farmer;
 	private int unregisteredCows;
 	public FarmerHandler(MchoiceUssdSender ussdSender, String address, String conversationId, HashMap<String, Object> userData)
@@ -27,6 +25,7 @@ public class FarmerHandler extends Handler
 	
 	public void showInitMenu()//show initial menu in this class
 	{
+		System.out.println("Showing init Farmer message");
 		showMenu(screens[0], screen1Id);
 	}
 	
@@ -43,16 +42,26 @@ public class FarmerHandler extends Handler
 			farmer.setCounty(message);
 			showMenu(screens[2], 2);
 		}
-		else if(footprintText.equals(String.valueOf(screen1Id)+","+String.valueOf(1)+","+String.valueOf(2)))//reply from third scree
+		else if(footprintText.equals(String.valueOf(screen1Id)+","+String.valueOf(1)+","+String.valueOf(2)))//reply from third screen
 		{
 			farmer.setDistrict(message);
-			showMenu(screens[3], 3);
+			//showMenu(screens[3], 3);//replace this with cowhandler init message
+			CowHandler cowHandler=(CowHandler)userData.get(CowHandler.KEY);
+			cowHandler.setUserData(userData);
+			cowHandler.showInitMessage();
 		}
-		else if(footprintText.equals(String.valueOf(screen1Id)+","+String.valueOf(1)+","+String.valueOf(2)+","+String.valueOf(3)))
+		else if(footprintText.contains(String.valueOf(screen1Id)+","+String.valueOf(1)+","+String.valueOf(2)+","+String.valueOf(CowHandler.screen1Id)))//reply from fourth screen
 		{
-			unregisteredCows=Integer.valueOf(message);
-			//TODO: call the cow handler until all cows are registerd
+			System.out.println("Redirecting user to CowHandler");
+			CowHandler cowHandler=(CowHandler)userData.get(CowHandler.KEY);
+			cowHandler.handleMessage(message);
+			
 		}
 	}
-
+	
+	public void addCow(Cow newCow)
+	{
+		farmer.addCow(newCow);
+	}
+	
 }

@@ -31,12 +31,15 @@ public class MessageReciever extends MchoiceUssdReceiver
 			MchoiceUssdSender ussdSender=new MchoiceUssdSender("http://127.0.0.1:8000/ussd/", "appid", "password");
 			if(session.containsKey(address))//not the first time for user
 			{
+				System.out.println("Message recieved: "+message);
 				HashMap<String, Object> userData=session.get(address);
 				ArrayList<Integer> userFootprint=(ArrayList<Integer>)userData.get(Handler.FOOTPRINT_KEY);
 				if(userFootprint.size()==0)//from the main menu
 				{
+					System.out.println("Footprint empty, user prbably at main menu");
 					if(message.equals(String.valueOf(FarmerHandler.screen1Id)))
 					{
+						System.out.println("Redirecting message to FarmerHandler");
 						FarmerHandler farmerHandler=(FarmerHandler)userData.get(FarmerHandler.KEY);
 						farmerHandler.setUserData(userData);
 						farmerHandler.showInitMenu();
@@ -46,16 +49,32 @@ public class MessageReciever extends MchoiceUssdReceiver
 				{
 					if(userFootprint.get(0)==FarmerHandler.screen1Id)
 					{
+						System.out.println("Redirecting user to FarmerHandler");
 						FarmerHandler farmerHandler=(FarmerHandler)userData.get(FarmerHandler.KEY);
 						farmerHandler.handleMessage(message);
+					}
+					else if(userFootprint.get(0)==0)
+					{
+						userFootprint.clear();
+						if(Integer.valueOf(message)==1)
+						{
+							ussdSender.sendMessage(mainMenuText, address, conversationId, false);
+						}
+						else
+						{
+							terminateSession(ussdSender, true, address, conversationId);
+						}
+							
 					}
 				}
 			}
 			else//first time for this user
 			{
+				System.out.println("First time user, creating session");
 				HashMap<String, Object> hashMap=new HashMap<String, Object>();
 				hashMap.put(Handler.FOOTPRINT_KEY, new ArrayList<Integer>());
 				hashMap.put(FarmerHandler.KEY, new FarmerHandler(ussdSender,address, conversationId,null));
+				hashMap.put(CowHandler.KEY, new CowHandler(ussdSender, address, conversationId, null));
 				session.put(address, hashMap);
 				ussdSender.sendMessage(mainMenuText, address, conversationId, false);
 			}
