@@ -1,10 +1,6 @@
 package org.ilri.mistro.ussd;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.ConcurrentMap;
-
 import hms.sdp.ussd.client.MchoiceUssdSender;
 
 public class FarmerHandler extends Handler
@@ -20,7 +16,7 @@ public class FarmerHandler extends Handler
 	public FarmerHandler(MchoiceUssdSender ussdSender, String address, String conversationId, HashMap<String, Object> userData)
 	{
 		super(ussdSender,address,conversationId,userData);
-		this.farmer=new Farmer();
+		this.farmer=new Farmer(address);//TODO: decrypt address
 	}
 	
 	public void showInitMenu()//show initial menu in this class
@@ -49,6 +45,7 @@ public class FarmerHandler extends Handler
 			CowHandler cowHandler=(CowHandler)userData.get(CowHandler.KEY);
 			cowHandler.setUserData(userData);
 			cowHandler.showInitMessage();
+			farmer.addToDatabase();
 		}
 		else if(footprintText.contains(String.valueOf(screen1Id)+","+String.valueOf(1)+","+String.valueOf(2)+","+String.valueOf(CowHandler.screen1Id)))//reply from fourth screen
 		{
@@ -58,10 +55,19 @@ public class FarmerHandler extends Handler
 			
 		}
 	}
-	
+
 	public void addCow(Cow newCow)
 	{
 		farmer.addCow(newCow);
+	}
+
+	@Override
+	public void setUserData(HashMap<String, Object> userData)
+	{
+		super.setUserData(userData);
+		//add database to farmer object
+		Database database=(Database)userData.get(Database.KEY);
+		farmer.setDatabase(database);
 	}
 	
 }

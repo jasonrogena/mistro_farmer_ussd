@@ -75,6 +75,7 @@ public class MessageReciever extends MchoiceUssdReceiver
 				hashMap.put(Handler.FOOTPRINT_KEY, new ArrayList<Integer>());
 				hashMap.put(FarmerHandler.KEY, new FarmerHandler(ussdSender,address, conversationId,null));
 				hashMap.put(CowHandler.KEY, new CowHandler(ussdSender, address, conversationId, null));
+				hashMap.put(Database.KEY, new Database("ilri_mistro", "root", "jason"));
 				session.put(address, hashMap);
 				ussdSender.sendMessage(mainMenuText, address, conversationId, false);
 			}
@@ -95,6 +96,11 @@ public class MessageReciever extends MchoiceUssdReceiver
 			{
 				ussdSender.sendMessage(sessionTerminationText, address, conversationId, true);
 			}
+			Database userDatabase=(Database)session.get(address).get(Database.KEY);
+			if(userDatabase!=null)
+			{
+				userDatabase.close();
+			}
 			session.remove(address);
 		} 
 		catch (MchoiceUssdException e)
@@ -107,6 +113,7 @@ public class MessageReciever extends MchoiceUssdReceiver
 	@Override
 	public void onSessionTerminate(MchoiceUssdTerminateMessage arg0) 
 	{
+		//TODO:close the database
 		session.remove(arg0.getAddress());
 	}
 	
